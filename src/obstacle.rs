@@ -3,7 +3,6 @@ use embedded_graphics::{
     prelude::*,
 };
 use esp_hal::rng::Rng;
-use esp_println::println;
 use heapless::spsc::Queue;
 
 use crate::game::{DisplayType, ImgRawType};
@@ -68,32 +67,34 @@ impl Obstacle {
 }
 
 const MAX_OBSTACLES: usize = 4;
-const OBSTALCE_VERTICAL_GAP: i32 = 20;
+const OBSTALCE_VERTICAL_GAP: i32 = 30;
 const PIPE_HEIGHT: usize = 60;
 pub const OBSTACLE_VELOCITY: i32 = -2; // obstacles moving left side, so it is X-velocity
 const OBSTALCE_HORIZONTAL_GAP: i32 = 50;
 
-//TODO: get dims from new
-const OLED_WIDTH: i32 = 128;
-
 pub struct Obstacles {
     rng: Rng,
     pub buffer: Queue<Obstacle, MAX_OBSTACLES>,
+    display_width: i32,
 }
 
 impl Obstacles {
-    pub fn new(mut rng: Rng) -> Self {
+    pub fn new(mut rng: Rng, display_width: i32) -> Self {
         let mut buffer = Queue::new();
 
         for i in 0..MAX_OBSTACLES - 1 {
             let obs_y = Obstacles::get_rand_y(&mut rng);
             let offset = OBSTALCE_HORIZONTAL_GAP * i as i32;
             buffer
-                .enqueue(Obstacle::new(OLED_WIDTH + offset, obs_y))
+                .enqueue(Obstacle::new(display_width + offset, obs_y))
                 .unwrap();
         }
 
-        Obstacles { rng, buffer }
+        Obstacles {
+            rng,
+            buffer,
+            display_width,
+        }
     }
 
     pub fn update(&mut self) -> bool {
@@ -109,7 +110,10 @@ impl Obstacles {
                 self.buffer.dequeue();
                 let obs_y = Obstacles::get_rand_y(&mut self.rng);
                 self.buffer
-                    .enqueue(Obstacle::new(OLED_WIDTH + OBSTALCE_HORIZONTAL_GAP, obs_y))
+                    .enqueue(Obstacle::new(
+                        self.display_width + OBSTALCE_HORIZONTAL_GAP,
+                        obs_y,
+                    ))
                     .ok();
             }
         }

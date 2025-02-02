@@ -69,7 +69,7 @@ pub async fn jump_btn(btn: GpioPin<BTN_PIN>) {
 
     loop {
         if input_btn.is_low() {
-            game::IS_JUMPING.swap(true, Ordering::Relaxed);
+            game::BUTTON_PRESSED.swap(true, Ordering::Relaxed);
             Timer::after(Duration::from_millis(100)).await;
         }
 
