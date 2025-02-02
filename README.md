@@ -43,6 +43,10 @@ or with Buzzer support
 cargo run --release -F buzzer
 ```
 
+## Preview of the Game
+
+https://github.com/user-attachments/assets/b0ea3ffc-8a5f-4589-827a-7bd3f00df8cd
+
 ## Related Tutorials
 
 You can refer to the following tutorials in the "impl Rust on ESP32" book to learn how to use [OLED](https://esp32.implrust.com/oled/index.html) and [Active Buzzer](https://esp32.implrust.com/buzzer/index.html) with the ESP32.
