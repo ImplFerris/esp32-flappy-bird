@@ -11,6 +11,8 @@ use embedded_graphics::mono_font::MonoTextStyleBuilder;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::prelude::*;
 use embedded_graphics::text::{Baseline, Text};
+#[cfg(feature = "buzzer")]
+use esp_hal::gpio::{GpioPin, Level, Output};
 use esp_hal::{i2c::master::I2c, rng::Rng};
 use heapless::String;
 use ssd1306::{
@@ -24,6 +26,8 @@ pub type DisplayType<'a> = Ssd1306Async<
 >;
 
 pub static BUTTON_PRESSED: AtomicBool = AtomicBool::new(false);
+#[cfg(feature = "buzzer")]
+const BUZZER_PIN: u8 = 33;
 
 const GRAVITY: i32 = 2;
 const FLAP_STRENGTH: i32 = -6;
@@ -81,11 +85,16 @@ impl<'a> Game<'a> {
         )
     }
 
-    pub async fn start(&mut self) {
+    pub async fn start(&mut self, #[cfg(feature = "buzzer")] buzzer_pin: GpioPin<BUZZER_PIN>) {
+        #[cfg(feature = "buzzer")]
+        let mut buzzer = Output::new(buzzer_pin, Level::Low);
         let mut title_buff: String<64> = String::new();
         let screen_height = self.display.dimensions().1 as i32;
         let mut prev_state;
         loop {
+            #[cfg(feature = "buzzer")]
+            buzzer.set_low();
+
             title_buff.clear();
 
             prev_state = self.state;
@@ -105,6 +114,8 @@ impl<'a> Game<'a> {
                     self.player.update(Point::new(0, player_velocity));
 
                     if self.obstacles.update() {
+                        #[cfg(feature = "buzzer")]
+                        buzzer.set_high();
                         self.score += 1;
                     }
 

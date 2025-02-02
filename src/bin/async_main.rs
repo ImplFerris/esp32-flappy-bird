@@ -59,7 +59,11 @@ async fn main(spawner: Spawner) {
 
     // Initialize the Game
     let mut game = Game::new(display, rng);
-    game.start().await;
+    game.start(
+        #[cfg(feature = "buzzer")]
+        peripherals.GPIO33,
+    )
+    .await;
 }
 
 // To Reset the game
